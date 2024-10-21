@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVID-19 Cases by Country</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 100vh; /* Full-screen height */
+        }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    // Initialize the map
+    var map = L.map('map').setView([20, 0], 2); // Center the map
+
+    // Add OpenStreetMap basemap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Function to calculate circle radius based on cases
+    function getRadius(cases) {
+        return Math.sqrt(cases) * 0.1; // Scale the size (adjust this value if necessary)
+    }
+
+    // Fetch the GeoJSON data
+    fetch('path/to/your/covid_data.geojson') // Update with the correct path
+        .then(response => response.json())
+        .then(data => {
+            data.features.forEach(feature => {
+                const { Country, Case, Deathcase } = feature.properties;
+                const coords = feature.geometry.coordinates[0]; // Adjust for your GeoJSON structure
+
+                // Create a circle marker for each country
+                const marker = L.circleMarker([coords[1], coords[0]], {
+                    radius: getRadius(Case),
+                    fillColor: 'green',
+                    color: 'green',
+                    fillOpacity: 0.5,
+                    stroke: false
+                }).addTo(map);
+                
+                // Bind a popup to show cases and deaths
+                marker.bindPopup(`Country: ${Country}<br>Cases: ${Case}<br>Deaths: ${Deathcase}`);
+            });
+        });
+</script>
+
+</body>
+</html>
